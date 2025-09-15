@@ -20,7 +20,8 @@
 แนบรูปสลีป
 
 ##
-![6](https://github.com/user-attachments/assets/7b6eaf93-8363-48f2-996b-cae78c409e4d)
+<img width="947" height="741" alt="image" src="https://github.com/user-attachments/assets/02ca98e6-d00e-4701-8aa1-981cc2d8f58d" />
+
 
 
 
