@@ -14,6 +14,7 @@ public class Login implements FocusListener {
     JTextField tf1 = new JTextField("Username or Email");
     JPasswordField pf1 = new JPasswordField("Password");
     char defaultEchoChar; // <-- ย้ายมาประกาศตรงนี้เพื่อให้ constructor มองเห็น
+    ImageIcon img = new ImageIcon("../Lib/Img/logo_notext.png");
 
     public Login() {
         // เก็บค่า echo char เริ่มต้นหลังจากสร้าง object JPasswordField แล้ว
@@ -148,9 +149,11 @@ public class Login implements FocusListener {
 }
 
     public void Finally() {
+        
         f.setSize(900, 700);
         f.setLocationRelativeTo(null);
         f.setResizable(false);
+        f.setIconImage(img.getImage());
         f.setVisible(true);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
