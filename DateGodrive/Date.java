@@ -1,23 +1,54 @@
 package DateGodrive;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.*;
+
 import javax.swing.*;
 import javax.swing.border.*;
-public class Date {
-    public Date() {
+public class Date  {
+    public Date () {
         JFrame f = new JFrame("GoDrive");
 
         // ใช้ JLayeredPane แทน Container ปกติ
         JLayeredPane date = new JLayeredPane();
         date.setPreferredSize(new Dimension(900, 700));
 
-        // --- จุดแก้ไขที่ 1: โหลดรูปภาพด้วยวิธีที่ถูกต้องและปรับขนาด ---
-        /*ImageIcon banner = new ImageIcon(getClass().getResource("/car/banner.jpg"));
-        Image scaledImage = banner.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
-        ImageIcon userIcon = new ImageIcon(scaledImage);
-        JLabel imageLabel = new JLabel(userIcon);*/
+        JPanel BN = new JPanel();
+        BN.setBackground(new Color(189, 189, 250));
+        BN.setBounds(200, 0, 700, 200);
+        BN.setLayout(null); // ต้องเพิ่มบรรทัดนี้เพื่อใช้ setBounds กับ component ด้านใน
 
-         // 1. วางรูปภาพไว้บนสุด
-        //imageLabel.setBounds(105, 80, 80, 80); // x, y, width, height
+        // --- จุดแก้ไขที่ 1: โหลดรูปภาพด้วยวิธีที่ถูกต้องและปรับขนาด ---
+        ImageIcon originalIcon = new ImageIcon(getClass().getResource("more/Background.jpg"));
+        Image scaledImage = originalIcon.getImage().getScaledInstance(700, 200, Image.SCALE_SMOOTH);
+        ImageIcon userIcon = new ImageIcon(scaledImage);
+        JLabel imageLabel = new JLabel(userIcon);
+
+        //สร้างSearch Car
+        JLabel s = new JLabel("Search Car");
+        s.setFont(new Font(null, Font.BOLD, 25));
+        s.setForeground(Color.WHITE);
+        s.setBounds(265, 60, 300, 30); 
+
+        //สร้างแท็บด้านล่าง
+        JPanel UN = new JPanel();
+        UN.setBackground(new Color(243,243,243));
+        UN.setBounds(200, 500, 700, 200);
+        UN.setLayout(null); // ต้องเพิ่มบรรทัดนี้เพื่อใช้ setBounds กับ component ด้านใน
+
+
+        ImageIcon originalIcon2 = new ImageIcon(getClass().getResource("more/Bar2.jpg"));
+        Image scaledImage2 = originalIcon2.getImage().getScaledInstance(670, 170, Image.SCALE_SMOOTH);
+        ImageIcon userIcon2 = new ImageIcon(scaledImage2);
+        JLabel imageLabel2 = new JLabel(userIcon2);
+
+        imageLabel.setBounds(0, 0, 700, 200); // x, y, width, height
+        BN.add(s);
+        BN.add(imageLabel);
+
+        imageLabel2.setBounds(5, 5, 675, 165);
+        UN.add(imageLabel2);
 
         // Menu Panel
         JPanel menu = new JPanel();
@@ -46,7 +77,7 @@ public class Date {
 
         // ld Panel 
         JPanel ld = new JPanel();
-        ld.setBackground(new Color(189, 189, 189));
+        ld.setBackground(new Color(246, 246, 246));
         ld.setBounds(300, 120, 490, 350);
         ld.setLayout(null); // ต้องเพิ่มบรรทัดนี้เพื่อใช้ setBounds กับ component ด้านใน
 
@@ -123,27 +154,13 @@ public class Date {
 
 //-------------------------------------------------------------------------------------------------------    
 
-        JButton ok = new JButton("OK");
-        ok.setBounds(387, 250, 80, 40); 
+        JButton ok = new JButton("Search");
+        ok.setBounds(367, 260, 100, 30); 
+        ok.setFont(new Font(null, Font.BOLD, 15));
+        ok.setForeground(Color.WHITE);
+        ok.setBackground(new Color(45, 114, 178));;
 
 //-------------------------------------------------------------------------------------------------------
-
-        JPanel under = new JPanel();
-        under.setBackground(new Color(189, 189, 189));
-        under.setBounds(200, 550, 700, 400);
-        under.setLayout(null); // ต้องเพิ่มบรรทัดนี้เพื่อใช้ setBounds กับ component ด้านใน
-
-          JLabel u1 = new JLabel("Rent a car with GoDrive");
-        u1.setFont(new Font("Arial", Font.BOLD, 20));
-        u1.setBounds(10, 10, 300, 18);
-
-        JLabel u2 = new JLabel("What are the advantages of renting a car with us?");
-        u2.setFont(new Font("Arial", Font.BOLD, 13));
-        u2.setBounds(10, 30, 1000, 20);
-
-        under.add(u1); under.add(u2);
-
-        //-------------------------------------------------------------------------------------------------------
 
         ld.add(loca); ld.add(day); ld.add(poin); ld.add(poin);ld.add(minute2);
         ld.add(location); ld.add(month); ld.add(RD);ld.add(month2);ld.add(ok);
@@ -155,18 +172,35 @@ public class Date {
         date.add(mainPanel, JLayeredPane.PALETTE_LAYER);
         //date.add(imageLabel);
         date.add(ld, JLayeredPane.MODAL_LAYER); 
-        date.add(under,JLayeredPane.MODAL_LAYER);
+        date.add(BN,JLayeredPane.MODAL_LAYER);
+        date.add(UN,JLayeredPane.MODAL_LAYER);
 
         f.add(date);
-       f.setContentPane(date);
+        f.setContentPane(date);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setSize(900, 700);
         f.setLocationRelativeTo(null);
         f.setVisible(true);
 
-        
         Popup popup = new Popup(f);
         popup.setVisible(true);
 
+      ok.addActionListener(new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        loca.setText("");       // ล้างช่อง Location
+        hour.setText("");       // ล้างช่องเวลา ชั่วโมง
+        minute.setText("");     // ล้างช่องเวลา นาที
+        hour2.setText("");      // ล้างช่องคืน ชั่วโมง
+        minute2.setText("");    // ล้างช่องคืน นาที
+        day.setSelectedIndex(0);
+        month.setSelectedIndex(0);
+        day2.setSelectedIndex(0);
+        month2.setSelectedIndex(0);
+
+        new PRData();
     }
+});
+    }
+
 }
