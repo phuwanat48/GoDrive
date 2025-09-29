@@ -6,7 +6,7 @@ public class main {
         
         // new Login();
         
-         new Addnewcar();
+        // new Addnewcar();
         
      
         // new userhistory();
@@ -14,7 +14,7 @@ public class main {
         // สร้างหน้าต่างประวัติการเช่าและส่ง path ของไฟล์เข้าไปเลย
         // new userhistory(filePath);
                 
-                 //new CarCard();
+                 new CarCard();
        
        
 
