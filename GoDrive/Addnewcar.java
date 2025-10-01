@@ -65,11 +65,13 @@ public class Addnewcar extends JFrame {
         UserH.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // ระบุตำแหน่งไฟล์ CSV
                 String filePath = "./Lib/data/UserRentalHistory.csv"; 
-                new userhistory(filePath);
-                // dispose(); // ปิดหน้าต่างปัจจุบัน
-            }
+            new userhistory(filePath);
+               
+                 dispose(); // ปิดหน้าต่างปัจจุบัน
+                 
+    }
+            
         });
         menuPanel.add(UserH);
 
@@ -178,7 +180,7 @@ public class Addnewcar extends JFrame {
         });
     }
 
-    private void Finally() {
+    public void Finally() {
         setSize(900, 700);
         setLocation(300, 100);
         setVisible(true);

@@ -1,5 +1,6 @@
 package GoDrive;
 import java.awt.*;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -10,8 +11,11 @@ import java.util.List;
 import javax.swing.*;
 
 public class userhistory {
+    
 
+    
     private JFrame frame = new JFrame("GoDrive - Rental History");
+   
     private JPanel dataPanel = new JPanel();
     private JTextField searchField = new JTextField();
 
@@ -19,17 +23,50 @@ public class userhistory {
     private final String csvFilePath;
 
     public userhistory(String csvFilePath) {
+
+        
+
         this.csvFilePath = csvFilePath;
         this.allRentalData = loadDataFromCsv(this.csvFilePath);
-        setupFrame();
+        setComponent();
+        Finally();
         createHeaderAndSearch();
         createDataContainer();
         displayData(this.allRentalData);
         frame.setVisible(true);
     }
+    private void setComponent(){
+        // --- จุดแก้ไขที่ 1: โหลดรูปภาพด้วยวิธีที่ถูกต้องและปรับขนาด ---
+        ImageIcon originalIcon = new ImageIcon(getClass().getResource("/Lib/Img/back.png"));
+        Image scaledImage = originalIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        ImageIcon userIcon = new ImageIcon(scaledImage);
+        JLabel imageLabel = new JLabel(userIcon);
+
+        
+        
+        // 1. วางรูปภาพไว้บนสุด
+        imageLabel.setBounds(5, 550, 80, 80); // x, y, width, height
+        imageLabel.addMouseListener(new MouseAdapter() {
+           
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // 1. ปิดหน้าต่าง Login ปัจจุบัน
+                frame.dispose();
+
+                SwingUtilities.invokeLater(() -> {
+                // สมมติว่าคุณมีคลาส RegisterFrame.java
+                // new RegisterFrame().setVisible(true);
+                // หรือถ้าคลาส Register ของคุณชื่ออื่น ให้เปลี่ยนตามนั้น
+                new Addnewcar().Finally(); 
+                });
+            }
+        });
+
+        frame.add(imageLabel);
+        
+    }
     
-    // ... (เมธอด setupFrame เหมือนเดิม)
-    private void setupFrame() {
+    private void Finally() {
         frame.setSize(900, 650);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
