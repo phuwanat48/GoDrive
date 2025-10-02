@@ -42,15 +42,6 @@
 
 <img width="500" height="500" alt="page5_popup" src="https://github.com/user-attachments/assets/7e39f9c6-7e0f-40f1-aa96-59525c84b92f" />
 
-# เพิ่มหน้าLogin-Sign in สำหรับ User และ Admin 
-
-
-
-<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/7e95a8b0-eacb-4006-8224-265a1d03adb7" />
-
-##
-
-<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/636cc97a-87f0-4d6d-b03f-134b9620e863" />
 
 
 
