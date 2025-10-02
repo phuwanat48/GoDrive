@@ -2,8 +2,6 @@ package DateGodrive;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
-
 import javax.swing.*;
 import javax.swing.border.*;
 public class Date  {
@@ -81,14 +79,14 @@ public class Date  {
         ld.setBounds(300, 120, 490, 350);
         ld.setLayout(null); // ต้องเพิ่มบรรทัดนี้เพื่อใช้ setBounds กับ component ด้านใน
 
-        JLabel location = new JLabel("-- Pic-up Location ------");
+        JLabel location = new JLabel("-- Pick-up Location ------");
         location.setFont(new Font(null, Font.BOLD, 18));
         location.setBounds(20, 20, 300, 30); 
 
         JTextField loca = new JTextField("Location");
         loca.setBounds(20, 50, 360, 30);
 
-        JLabel PD = new JLabel("-- Pic-up Date ------");
+        JLabel PD = new JLabel("-- Pick-up Date ------");
         PD.setFont(new Font(null, Font.BOLD, 18));
         PD.setBounds(20,90, 300, 30); 
         JComboBox<String> day = new JComboBox<>();
@@ -108,7 +106,7 @@ public class Date  {
         month.addItem("11");month.addItem("12");
         month.setBounds(100, 120, 80, 30);
 
-        JLabel Ptime = new JLabel("-- Pic-up Time ------");
+        JLabel Ptime = new JLabel("-- Pick-up Time ------");
         Ptime.setFont(new Font(null, Font.BOLD, 18));
         Ptime.setBounds(300,90, 300, 30); 
         JTextField hour = new JTextField("hour");
@@ -181,6 +179,7 @@ public class Date  {
         f.setSize(900, 700);
         f.setLocationRelativeTo(null);
         f.setVisible(true);
+        f.setResizable(false);
 
         Popup popup = new Popup(f);
         popup.setVisible(true);
