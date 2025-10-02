@@ -95,7 +95,7 @@ public class Date {
         ld.setLayout(null);
 
         // --- Location ---
-        JLabel location = new JLabel("-- Pic-up Location ------");
+        
         JLabel location = new JLabel("-- Pick-up Location ------");
         location.setFont(new Font(null, Font.BOLD, 18));
         location.setBounds(20, 20, 300, 30);
@@ -103,7 +103,7 @@ public class Date {
         loca.setBounds(20, 50, 360, 30);
 
         // --- Pick-up Date ---
-        JLabel PD = new JLabel("-- Pic-up Date ------");
+       
         JLabel PD = new JLabel("-- Pick-up Date ------");
         PD.setFont(new Font(null, Font.BOLD, 18));
         PD.setBounds(20, 90, 300, 30);
@@ -128,7 +128,7 @@ public class Date {
 
 
         // --- Pick-up Time ---
-        JLabel Ptime = new JLabel("-- Pic-up Time ------");
+       
         JLabel Ptime = new JLabel("-- Pick-up Time ------");
         Ptime.setFont(new Font(null, Font.BOLD, 18));
         Ptime.setBounds(300, 90, 300, 30);
