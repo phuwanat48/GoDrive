@@ -1,11 +1,15 @@
 package DateGodrive;
 
 import java.awt.*;
+
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import java.lang.*;
 
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -92,6 +96,7 @@ public class Date {
 
         // --- Location ---
         JLabel location = new JLabel("-- Pic-up Location ------");
+        JLabel location = new JLabel("-- Pick-up Location ------");
         location.setFont(new Font(null, Font.BOLD, 18));
         location.setBounds(20, 20, 300, 30);
         loca = new JTextField("Location");
@@ -99,6 +104,7 @@ public class Date {
 
         // --- Pick-up Date ---
         JLabel PD = new JLabel("-- Pic-up Date ------");
+        JLabel PD = new JLabel("-- Pick-up Date ------");
         PD.setFont(new Font(null, Font.BOLD, 18));
         PD.setBounds(20, 90, 300, 30);
         
@@ -120,8 +126,10 @@ public class Date {
         month.addItem("11");month.addItem("12");
         month.setBounds(100, 120, 80, 30);
 
+
         // --- Pick-up Time ---
         JLabel Ptime = new JLabel("-- Pic-up Time ------");
+        JLabel Ptime = new JLabel("-- Pick-up Time ------");
         Ptime.setFont(new Font(null, Font.BOLD, 18));
         Ptime.setBounds(300, 90, 300, 30);
         hour = new JTextField("hour");
@@ -194,6 +202,7 @@ public class Date {
         f.setSize(900, 700);
         f.setLocationRelativeTo(null);
         f.setVisible(true);
+        f.setResizable(false);
 
         // Popup (Assuming Popup class is defined elsewhere)
         //Popup popup = new Popup(f);
