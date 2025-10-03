@@ -57,7 +57,7 @@ public class CarCard extends JFrame {
         menu.add(Box.createVerticalGlue()); 
 
         try {
-            String arrowIconPath = "images/back.png";
+            String arrowIconPath = "Lib/img/back.png";
             ImageIcon originalArrowIcon = new ImageIcon(getClass().getClassLoader().getResource(arrowIconPath));
             Image resizedArrowImage = originalArrowIcon.getImage().getScaledInstance(35, 35, Image.SCALE_SMOOTH);
             ImageIcon arrowIcon = new ImageIcon(resizedArrowImage);
