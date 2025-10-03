@@ -1,7 +1,8 @@
 Status,Car Brand,Order Date,Customer Name,Price(THB)
 Canceled,Honda,25/10/2024  14:30,Mr. John Doe,1200
 Paid,Toyota,09/07/2024  10:19,Ms. Jane Smith,999
-Processing,Ford,30/05/2024  12:57,Mr. Alex Johnson,1279
 Returned,Toyota,12/12/2023  16:45,Mr. Michael Brown,1236
 Picked up,Honda,29/11/2023  09:00,Ms. Sarah Wilson,999
 Paid,Ford,22/09/2023  13:20,Ms. Jasmine Byers,1150
+Processing,Toyota,12/08/2023  16:50,Mr. James Smith,1600
+

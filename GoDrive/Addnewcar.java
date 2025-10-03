@@ -1,188 +1,231 @@
 package GoDrive;
-
+import CarCard.*;
+import GoDrive.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.filechooser.*;
 
 public class Addnewcar extends JFrame {
 
-    private JTextField brandTextField;
-    private JTextField modelTextField;
-    private JTextField priceTextField;
+    private JTextField brandTextField, modelTextField, priceTextField;
     private JLabel imageLabel;
-    private JPanel imagePanel;
-    private JButton addButton;
-    private JComboBox<String> typeComboBox;
+    private JButton addButton, deleteButton, nextPageButton;
+    private JComboBox<String> addTypeComboBox;
+    private JComboBox<Vehicle> deleteComboBox;
     private ImageIcon selectedIcon;
+    private String selectedImagePath;
 
-    public Addnewcar() {
-        super("GoDrive - Add New Vehicle");
-        Initial();
+    public VehicleManager manager;
+    public CarCardPN carPanel;
+    public CarCardPN motorcyclePanel;
+
+    public Addnewcar(VehicleManager manager, CarCardPN carPanel, CarCardPN motorcyclePanel) {
+        super("GoDrive");
+        this.manager = manager;
+        this.carPanel = carPanel;
+        this.motorcyclePanel = motorcyclePanel;
         setComponent();
         createListeners();
         Finally();
-    }
-
-    private void Initial() {
-        Container cp = getContentPane();
-        cp.setLayout(new BorderLayout());
+        updateDeleteComboBox();
     }
 
     private void setComponent() {
+        JPanel mainPanel = new JPanel(new BorderLayout(20, 20));
+        mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
+
+        Font customFont = new Font("Arial", Font.PLAIN, 14);
+        Font titleFont = new Font("Arial", Font.BOLD, 16);
+
+        // ---- Add Vehicle Panel ----
+        JPanel addPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 10, 8, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+
         brandTextField = new JTextField(15);
         modelTextField = new JTextField(15);
         priceTextField = new JTextField(15);
         addButton = new JButton("Add New");
-        imagePanel = new JPanel(new BorderLayout());
-        imagePanel.setBackground(new Color(233, 229, 222));
-        imagePanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        imagePanel.setPreferredSize(new Dimension(350, 250));
-        imageLabel = new JLabel("Add Picture", SwingConstants.CENTER);
-        imageLabel.setFont(new Font("Arial", Font.BOLD, 30));
+        addTypeComboBox = new JComboBox<>(new String[]{"Cars", "Motorcycles"});
+        imageLabel = new JLabel("Click to add picture", SwingConstants.CENTER);
+
+        brandTextField.setFont(customFont);
+        modelTextField.setFont(customFont);
+        priceTextField.setFont(customFont);
+        addButton.setFont(customFont);
+        addTypeComboBox.setFont(customFont);
+        imageLabel.setFont(customFont);
+
+        imageLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        imageLabel.setPreferredSize(new Dimension(250, 180));
         imageLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        imagePanel.add(imageLabel, BorderLayout.CENTER);
-        
-        JPanel menuPanel = new JPanel();
-        menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBackground(Color.WHITE);
-        menuPanel.setBorder(new EmptyBorder(25, 25, 25, 25));
-        menuPanel.setPreferredSize(new Dimension(200, 0));
-        JLabel nameBrandLabel = new JLabel("GoDrive");
-        nameBrandLabel.setFont(new Font("Arial", Font.BOLD, 29));
-        nameBrandLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        nameBrandLabel.setBorder(new EmptyBorder(0, 10, 20, 0));
-        menuPanel.add(nameBrandLabel);
-        
-        
 
-        JLabel UserH = new JLabel("UserHistory");
-        UserH.setFont(new Font("Arial", Font.BOLD, 20));
-        UserH.setAlignmentX(Component.CENTER_ALIGNMENT);
-        UserH.setBorder(new EmptyBorder(10, 0, 20, 0));
-        UserH.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                String filePath = "./Lib/data/UserRentalHistory.csv"; 
-            new userhistory(filePath);
-               
-                 dispose(); // ปิดหน้าต่างปัจจุบัน
-                 
+        JLabel typeLabel = new JLabel("Type:");
+        JLabel brandLabel = new JLabel("Brand:");
+        JLabel modelLabel = new JLabel("Model:");
+        JLabel priceLabel = new JLabel("Price/Day:");
+        typeLabel.setFont(customFont);
+        brandLabel.setFont(customFont);
+        modelLabel.setFont(customFont);
+        priceLabel.setFont(customFont);
+
+        gbc.gridx = 0; gbc.gridy = 0; addPanel.add(typeLabel, gbc);
+        gbc.gridx = 1; gbc.gridy = 0; gbc.fill = GridBagConstraints.HORIZONTAL; addPanel.add(addTypeComboBox, gbc);
+        gbc.gridx = 0; gbc.gridy = 1; gbc.fill = GridBagConstraints.NONE; addPanel.add(brandLabel, gbc);
+        gbc.gridx = 1; gbc.gridy = 1; gbc.fill = GridBagConstraints.HORIZONTAL; addPanel.add(brandTextField, gbc);
+        gbc.gridx = 0; gbc.gridy = 2; gbc.fill = GridBagConstraints.NONE; addPanel.add(modelLabel, gbc);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.fill = GridBagConstraints.HORIZONTAL; addPanel.add(modelTextField, gbc);
+        gbc.gridx = 0; gbc.gridy = 3; gbc.fill = GridBagConstraints.NONE; addPanel.add(priceLabel, gbc);
+        gbc.gridx = 1; gbc.gridy = 3; gbc.fill = GridBagConstraints.HORIZONTAL; addPanel.add(priceTextField, gbc);
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER; addPanel.add(imageLabel, gbc);
+        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2; gbc.fill = GridBagConstraints.HORIZONTAL; addPanel.add(addButton, gbc);
+
+        // ---- Container Panel with Next Button ----
+        JPanel addPanelContainer = new JPanel(new BorderLayout());
+        TitledBorder addBorder = BorderFactory.createTitledBorder("Add New Vehicle");
+        addBorder.setTitleFont(titleFont);
+        addPanelContainer.setBorder(addBorder);
+
+        ImageIcon nextPageIcon = new ImageIcon(getClass().getResource("/Lib/Img/next.png"));
+        Image img = nextPageIcon.getImage().getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+        nextPageButton = new JButton(new ImageIcon(img));
+        styleNavButton(nextPageButton);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(nextPageButton);
+
+        addPanelContainer.add(addPanel, BorderLayout.CENTER);
+        addPanelContainer.add(buttonPanel, BorderLayout.SOUTH);
+
+        // ---- Delete Vehicle Panel ----
+        JPanel deletePanel = new JPanel(new BorderLayout(10, 10));
+        TitledBorder deleteBorder = BorderFactory.createTitledBorder("Delete Vehicle");
+        deleteBorder.setTitleFont(titleFont);
+        deletePanel.setBorder(deleteBorder);
+
+        deleteComboBox = new JComboBox<>();
+        deleteButton = new JButton("Delete Selected Vehicle");
+        JLabel deleteLabel = new JLabel("Select vehicle to delete:");
+
+        deleteComboBox.setFont(customFont);
+        deleteButton.setFont(customFont);
+        deleteLabel.setFont(customFont);
+
+        deletePanel.add(deleteLabel, BorderLayout.NORTH);
+        deletePanel.add(deleteComboBox, BorderLayout.CENTER);
+        deletePanel.add(deleteButton, BorderLayout.SOUTH);
+
+        // ---- Add to Main Panel ----
+        mainPanel.add(addPanelContainer, BorderLayout.CENTER);
+        mainPanel.add(deletePanel, BorderLayout.SOUTH);
+
+        add(mainPanel);
     }
-            
-        });
-        menuPanel.add(UserH);
 
-        JPanel inputFieldsPanel = new JPanel(new GridBagLayout());
-        inputFieldsPanel.setBackground(new Color(235, 243, 250));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(4, 8, 4, 8);
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
-        Font labelFont = new Font("Arial", Font.BOLD, 16);
-        gbc.gridy = 0;
-        inputFieldsPanel.add(new JLabel("Vehicle Type") {
-            {
-                setFont(labelFont);
-            }
-        }, gbc);
-        String[] vehicleTypes = {"Cars", "Motorcycles"};
-        typeComboBox = new JComboBox<>(vehicleTypes);
-        gbc.gridy = 1;
-        inputFieldsPanel.add(typeComboBox, gbc);
-        gbc.gridy = 2;
-        inputFieldsPanel.add(new JLabel("Input brand") {
-            {
-                setFont(labelFont);
-            }
-        }, gbc);
-        gbc.gridy = 3;
-        inputFieldsPanel.add(brandTextField, gbc);
-        gbc.gridy = 4;
-        inputFieldsPanel.add(new JLabel("Input model") {
-            {
-                setFont(labelFont);
-            }
-        }, gbc);
-        gbc.gridy = 5;
-        inputFieldsPanel.add(modelTextField, gbc);
-        gbc.gridy = 6;
-        inputFieldsPanel.add(new JLabel("Input price (per day)") {
-            {
-                setFont(labelFont);
-            }
-        }, gbc);
-        gbc.gridy = 7;
-        inputFieldsPanel.add(priceTextField, gbc);
-        JPanel imageAndButtonPanel = new JPanel(new BorderLayout(0, 15));
-        imageAndButtonPanel.setOpaque(false);
-        imageAndButtonPanel.add(imagePanel, BorderLayout.CENTER);
-        imageAndButtonPanel.add(addButton, BorderLayout.SOUTH);
-        JPanel mainContentPanel = new JPanel();
-        mainContentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
-        mainContentPanel.setBackground(new Color(235, 243, 250));
-        mainContentPanel.add(imageAndButtonPanel);
-        mainContentPanel.add(inputFieldsPanel);
-        Container cp = getContentPane();
-        cp.add(menuPanel, BorderLayout.WEST);
-        cp.add(mainContentPanel, BorderLayout.CENTER);
+    private void styleNavButton(JButton button) {
+        button.setBorder(BorderFactory.createEmptyBorder());
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+    }
+
+    private void updateDeleteComboBox() {
+        deleteComboBox.removeAllItems();
+        List<Vehicle> cars = manager.getCarList();
+        for (Vehicle v : cars) {
+            deleteComboBox.addItem(v);
+        }
+        List<Vehicle> motorcycles = manager.getMotorcycleList();
+        for (Vehicle v : motorcycles) {
+            deleteComboBox.addItem(v);
+        }
     }
 
     private void createListeners() {
+        // Next Page Button Listener
+        nextPageButton.addActionListener(e -> {
+            this.dispose(); // Close the current Addnewcar window
+            SwingUtilities.invokeLater(() -> {
+                String csvFilePath = "./Lib/data/UserRentalHistory.csv"; // Ensure this path is correct
+                // Pass the current manager and panels to the history window
+                new userhistory(csvFilePath, this.manager, this.carPanel, this.motorcyclePanel);
+            });
+        });
+
+        // Image Label Listener
         imageLabel.addMouseListener(new MouseAdapter() {
-            @Override
             public void mouseClicked(MouseEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
-                FileNameExtensionFilter filter = new FileNameExtensionFilter("Image Files", "jpg", "png", "gif", "jpeg");
-                fileChooser.setFileFilter(filter);
-                if (fileChooser.showOpenDialog(Addnewcar.this) == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    selectedIcon = new ImageIcon(selectedFile.getAbsolutePath());
-                    Image scaledImage = selectedIcon.getImage().getScaledInstance(imagePanel.getWidth(), imagePanel.getHeight(), Image.SCALE_SMOOTH);
+                JFileChooser fc = new JFileChooser();
+                if (fc.showOpenDialog(Addnewcar.this) == JFileChooser.APPROVE_OPTION) {
+                    File file = fc.getSelectedFile();
+                    selectedImagePath = file.getAbsolutePath();
+                    selectedIcon = new ImageIcon(selectedImagePath);
                     imageLabel.setText("");
-                    imageLabel.setIcon(new ImageIcon(scaledImage));
+                    imageLabel.setIcon(new ImageIcon(selectedIcon.getImage().getScaledInstance(250, 180, Image.SCALE_SMOOTH)));
                 }
             }
         });
 
-        // 
+        // Add Button Listener
         addButton.addActionListener(e -> {
-            String brand = brandTextField.getText();
-            String model = modelTextField.getText();
-            String price = priceTextField.getText();
+            String brand = brandTextField.getText().trim();
+            String model = modelTextField.getText().trim();
+            String priceText = priceTextField.getText().trim();
 
-            if (brand.trim().isEmpty() || model.trim().isEmpty() || price.trim().isEmpty() || selectedIcon == null) {
-                JOptionPane.showMessageDialog(this, "Please fill in all fields and select an image.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (brand.isEmpty() || model.isEmpty() || priceText.isEmpty() || selectedImagePath == null) {
+                JOptionPane.showMessageDialog(this, "Please fill in the information completely.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            String vehicleType = (String) typeComboBox.getSelectedItem();
-            String priceFormatted = price.trim() + ".- / Day";
+            String price = priceText + ".- / Day";
+            Vehicle newVehicle = new Vehicle(brand, model, price, selectedImagePath);
+            String type = (String) addTypeComboBox.getSelectedItem();
 
-            if ("Cars".equals(vehicleType)) {
-                CarCard.car.addVehicleCard(brand.trim(), model.trim(), priceFormatted, selectedIcon);
-            } else {
-                CarCard.motorcycle.addVehicleCard(brand.trim(), model.trim(), priceFormatted, selectedIcon);
+            manager.addVehicle(newVehicle, type);
+
+            if (carPanel != null && "Cars".equals(type)) {
+                carPanel.addVehicle(newVehicle);
+            } else if (motorcyclePanel != null && "Motorcycles".equals(type)) {
+                motorcyclePanel.addVehicle(newVehicle);
             }
+            updateDeleteComboBox();
 
-            // แสดงข้อความยืนยัน แต่ไม่ต้องปิดหน้าต่าง ให้เพิ่มรถคันต่อไปได้
-            JOptionPane.showMessageDialog(this, "Vehicle '" + brand + "' added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-
-            // เคลียร์ฟอร์มให้ว่างเพื่อรอรับข้อมูลใหม่
             brandTextField.setText("");
             modelTextField.setText("");
             priceTextField.setText("");
-            imageLabel.setText("Add Picture");
             imageLabel.setIcon(null);
-            selectedIcon = null;
+            imageLabel.setText("Click to add picture");
+            selectedImagePath = null;
+        });
+
+        // Delete Button Listener
+        deleteButton.addActionListener(e -> {
+            Vehicle vehicleToDelete = (Vehicle) deleteComboBox.getSelectedItem();
+            if (vehicleToDelete == null) {
+                return;
+            }
+            int confirm = JOptionPane.showConfirmDialog(this, "Confirm to delete '" + vehicleToDelete + "'?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                String type = manager.getCarList().contains(vehicleToDelete) ? "Cars" : "Motorcycles";
+                manager.removeVehicle(vehicleToDelete, type);
+
+                if (carPanel != null && "Cars".equals(type)) {
+                    carPanel.removeVehicle(vehicleToDelete);
+                } else if (motorcyclePanel != null && "Motorcycles".equals(type)) {
+                    motorcyclePanel.removeVehicle(vehicleToDelete);
+                }
+                updateDeleteComboBox();
+            }
         });
     }
 
-    public void Finally() {
+    private void Finally() {
         setSize(900, 700);
-        setLocation(300, 100);
+        setLocationRelativeTo(null);
         setVisible(true);
         setResizable(false);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

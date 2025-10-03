@@ -1,20 +1,33 @@
+import CarCard.VehicleManager;
+import CarCard.*;
 import GoDrive.*;
+
 public class main {
     public static void main(String[] args) {
        // ระบุตำแหน่งไฟล์ CSV
-        String filePath = "./Lib/data/UserRentalHistory.csv"; 
+        String csvFilePath = "./Lib/data/UserRentalHistory.csv"; 
         
         
         
-         new Addnewcar();
+
+        // VehicleManager manager = new VehicleManager();
+
+         //new Addnewcar(manager, null, null);
+
+
+        // // 1. สร้าง "สมองกลาง" (VehicleManager) ขึ้นมาก่อน
+            VehicleManager manager = new VehicleManager();
+        //     // 2. สร้างหน้าต่างแสดงรายการรถ (CarCard) และส่ง manager เข้าไป
+             CarCard carCardWindow = new CarCard(manager);
+
         
      
-        // new userhistory();
+        
       
-        // สร้างหน้าต่างประวัติการเช่าและส่ง path ของไฟล์เข้าไปเลย
-        // new userhistory(filePath);
+
+
                 
-              //   new CarCard();
+
        
        
 

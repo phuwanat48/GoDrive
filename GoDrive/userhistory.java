@@ -1,4 +1,7 @@
 package GoDrive;
+import CarCard.CarCardPN;
+import CarCard.VehicleManager;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedReader;
@@ -11,22 +14,28 @@ import java.util.List;
 import javax.swing.*;
 
 public class userhistory {
-    
 
-    
-    private JFrame frame = new JFrame("GoDrive - Rental History");
-   
-    private JPanel dataPanel = new JPanel();
-    private JTextField searchField = new JTextField();
+    public JFrame frame = new JFrame("GoDrive - Rental History");
+    public JPanel dataPanel = new JPanel();
+    public JTextField searchField = new JTextField();
 
-    private List<String[]> allRentalData;
-    private final String csvFilePath;
+    private JLabel imageLabel;
 
-    public userhistory(String csvFilePath) {
+    public List<String[]> allRentalData;
+    public final String csvFilePath;
 
-        
+    // Fields to store the state from Addnewcar
+    private final VehicleManager manager;
+    private final CarCardPN carPanel;
+    private final CarCardPN motorcyclePanel;
 
+    // Updated Constructor
+    public userhistory(String csvFilePath, VehicleManager manager, CarCardPN carPanel, CarCardPN motorcyclePanel) {
         this.csvFilePath = csvFilePath;
+        this.manager = manager;
+        this.carPanel = carPanel;
+        this.motorcyclePanel = motorcyclePanel;
+
         this.allRentalData = loadDataFromCsv(this.csvFilePath);
         setComponent();
         Finally();
@@ -35,57 +44,48 @@ public class userhistory {
         displayData(this.allRentalData);
         frame.setVisible(true);
     }
-    private void setComponent(){
-        // --- จุดแก้ไขที่ 1: โหลดรูปภาพด้วยวิธีที่ถูกต้องและปรับขนาด ---
+
+    public void setComponent(){
         ImageIcon originalIcon = new ImageIcon(getClass().getResource("/Lib/Img/back.png"));
         Image scaledImage = originalIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH);
         ImageIcon userIcon = new ImageIcon(scaledImage);
-        JLabel imageLabel = new JLabel(userIcon);
 
-        
-        
-        // 1. วางรูปภาพไว้บนสุด
-        imageLabel.setBounds(5, 550, 80, 80); // x, y, width, height
+        // <<< 2. ลบ JLabel ด้านหน้าออก ให้ใช้ตัวแปรของคลาสแทน >>>
+        imageLabel = new JLabel(userIcon); // ไม่ต้องมี JLabel ข้างหน้า
+
+        imageLabel.setBounds(5, 550, 80, 80);
         imageLabel.addMouseListener(new MouseAdapter() {
-           
             @Override
             public void mouseClicked(MouseEvent e) {
-                // 1. ปิดหน้าต่าง Login ปัจจุบัน
-                frame.dispose();
-
+                frame.dispose(); // Close current history window
                 SwingUtilities.invokeLater(() -> {
-                // สมมติว่าคุณมีคลาส RegisterFrame.java
-                // new RegisterFrame().setVisible(true);
-                // หรือถ้าคลาส Register ของคุณชื่ออื่น ให้เปลี่ยนตามนั้น
-                new Addnewcar().Finally(); 
+                    // Recreate the Addnewcar window using the stored manager and panels
+                    new Addnewcar(manager, carPanel, motorcyclePanel);
                 });
             }
         });
 
-        frame.add(imageLabel);
-        
+
     }
-    
-    private void Finally() {
+
+        public void Finally() {
+        frame.add(imageLabel);
         frame.setSize(900, 650);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setLayout(null);
         frame.setResizable(false);
     }
-    
-    // *** แก้ไขเมธอดนี้ ***
-    private List<String[]> loadDataFromCsv(String filePath) {
+
+    public List<String[]> loadDataFromCsv(String filePath) {
+
         List<String[]> records = new ArrayList<>();
         String line = "";
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            br.readLine(); // ข้ามหัวตาราง
-            
+            br.readLine();
             while ((line = br.readLine()) != null) {
-                // ตรวจสอบว่าบรรทัดไม่ใช่บรรทัดว่าง
                 if (!line.trim().isEmpty()) {
-                    String[] data = line.split(",", -1); // ใช้ -1 เพื่อเก็บช่องว่างท้ายบรรทัด
-                    // ตรวจสอบว่ามีข้อมูลครบ 5 คอลัมน์หรือไม่
+                    String[] data = line.split(",", -1);
                     if (data.length >= 5) {
                         records.add(data);
                     }
@@ -97,8 +97,7 @@ public class userhistory {
         return records;
     }
 
-    // ... (เมธอด saveDataToCsv, deleteRecord, getStatusColor, createHeaderAndSearch, createDataContainer, performSearch เหมือนเดิม)
-    private void saveDataToCsv(String filePath, List<String[]> data) {
+    public void saveDataToCsv(String filePath, List<String[]> data) {
         String[] header = {"Status", "Car Brand", "Order Date", "Customer Name", "Price(THB)"};
         try (PrintWriter pw = new PrintWriter(new FileWriter(filePath))) {
             pw.println(String.join(",", header));
@@ -111,15 +110,15 @@ public class userhistory {
         }
     }
 
-    private void deleteRecord(String[] recordToDelete) {
+    public void deleteRecord(String[] recordToDelete) {
         allRentalData.remove(recordToDelete);
         saveDataToCsv(this.csvFilePath, allRentalData);
         searchField.setText("");
         performSearch();
         JOptionPane.showMessageDialog(frame, "Record deleted successfully.", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
-    
-    private Color getStatusColor(String status) {
+
+    public Color getStatusColor(String status) {
         switch (status.trim().toLowerCase()) {
             case "processing": return new Color(255, 165, 0);
             case "returned": return new Color(60, 179, 113);
@@ -130,7 +129,7 @@ public class userhistory {
         }
     }
 
-    private void createHeaderAndSearch() {
+    public void createHeaderAndSearch() {
         JLabel titleLabel = new JLabel("Search Rental History");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setBounds(20, 10, 400, 30);
@@ -156,7 +155,7 @@ public class userhistory {
         frame.add(headerPanel);
     }
 
-    private void createDataContainer() {
+    public void createDataContainer() {
         dataPanel.setLayout(null);
         dataPanel.setBackground(Color.WHITE);
         JScrollPane scrollPane = new JScrollPane(dataPanel);
@@ -164,7 +163,7 @@ public class userhistory {
         frame.add(scrollPane);
     }
 
-    private void performSearch() {
+    public void performSearch() {
         String searchText = searchField.getText().trim().toLowerCase();
         if (searchText.isEmpty()) {
             displayData(allRentalData);
@@ -172,7 +171,7 @@ public class userhistory {
         }
         List<String[]> filteredData = new ArrayList<>();
         for (String[] row : allRentalData) {
-            if (row.length >= 4) { // ตรวจสอบอีกครั้งเพื่อความปลอดภัย
+            if (row.length >= 4) {
                 String customerName = row[3].toLowerCase();
                 if (customerName.contains(searchText)) {
                     filteredData.add(row);
@@ -185,22 +184,20 @@ public class userhistory {
             displayData(filteredData);
         }
     }
-    
-    // *** แก้ไขเมธอดนี้ ***
-    private void displayData(List<String[]> dataToDisplay) {
+
+    public void displayData(List<String[]> dataToDisplay) {
+
         dataPanel.removeAll();
         int yPosition = 10;
         for (String[] data : dataToDisplay) {
-            // ตรวจสอบข้อมูลก่อนใช้งานอีกครั้ง เพื่อป้องกัน Error
-            if (data.length < 5) continue; // ถ้าข้อมูลไม่ครบ 5 ช่อง ให้ข้ามไปแถวถัดไป
-            
+            if (data.length < 5) continue;
+
             RoundedLabel statusLabel = new RoundedLabel(data[0], 15);
             statusLabel.setBounds(35, yPosition, 100, 25);
             statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
             statusLabel.setForeground(Color.WHITE);
             statusLabel.setBackground(getStatusColor(data[0]));
-           
-            
+
             JLabel brandLabel = new JLabel(data[1]); brandLabel.setBounds(160, yPosition, 120, 30);
             brandLabel.setHorizontalAlignment(SwingConstants.CENTER);
             JLabel dateLabel = new JLabel(data[2]); dateLabel.setBounds(280, yPosition, 160, 30);
@@ -227,7 +224,7 @@ public class userhistory {
                     deleteRecord(currentRowData);
                 }
             });
-            
+
             dataPanel.add(statusLabel); dataPanel.add(brandLabel); dataPanel.add(dateLabel);
             dataPanel.add(nameLabel); dataPanel.add(priceLabel); dataPanel.add(viewButton);
             dataPanel.add(deleteButton);
@@ -235,6 +232,8 @@ public class userhistory {
         }
         dataPanel.setPreferredSize(new Dimension(880, yPosition));
         dataPanel.revalidate();
-        dataPanel.repaint();
+        frame.repaint();
+
+
     }
 }
