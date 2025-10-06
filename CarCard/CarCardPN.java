@@ -1,5 +1,11 @@
 package CarCard;
+import GoDrive.CarCard;
+import GoDrive.Personal;
+import GoDrive.Reserve;
+
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -100,8 +106,25 @@ public class CarCardPN extends JPanel {
         
 
         card.add(details, BorderLayout.SOUTH);
-        
-        card.addActionListener(e -> JOptionPane.showMessageDialog(null, "You Choose : " + vehicle));
+
+        card.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "You Choose : " + vehicle);
+
+                // ส่ง "card" ซึ่งเป็น component ที่ถูกกดเข้าไปในเมธอด
+                newpage(card);
+            }
+        });
         return card;
+    }
+
+    private void newpage(Component component) {
+        // ค้นหา Window (ซึ่งอาจเป็น JFrame หรือ JDialog) ที่ component นี้อยู่
+        Window window = SwingUtilities.getWindowAncestor(component);
+        if (window != null) {
+            window.dispose(); // สั่งปิด Window ที่เจอ
+        }
+        new Reserve(new VehicleManager());
     }
 }
