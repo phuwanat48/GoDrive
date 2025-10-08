@@ -1,6 +1,8 @@
 package GoDrive;
 
 import CarCard.*;
+import GoDrive.DateGodrive.Date;
+
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -69,6 +71,8 @@ public class CarCard extends JFrame {
             backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             backButton.addActionListener(e -> {
                 JOptionPane.showMessageDialog(this, "Return");
+                this.dispose();
+                new Date();
             });
             menu.add(backButton);
         } catch (Exception e) {
