@@ -1,7 +1,8 @@
 package CarCard;
 import GoDrive.CarCard;
-import GoDrive.Personal;
-import GoDrive.Reserve;
+import GoDrive.*;
+
+
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -125,6 +126,6 @@ public class CarCardPN extends JPanel {
         if (window != null) {
             window.dispose(); // สั่งปิด Window ที่เจอ
         }
-        new Reserve(new VehicleManager());
+        new Reserve();
     }
 }
