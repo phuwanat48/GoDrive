@@ -339,6 +339,8 @@ public class Reserve  {
 
                   //แสดงข้อความยืนยันการบันทึก
                   JOptionPane.showMessageDialog(f, "Booking saved booking : ", "Success",JOptionPane.INFORMATION_MESSAGE );
+                     f.dispose();
+                     new Personal();
                  } 
                  catch (IOException ex){
                     //จัดการข้อผิดพลาดถ้าไม่สามารถถ้าเขียนไฟล์ได้
@@ -446,6 +448,7 @@ public class Reserve  {
     }
     
       
+
 
 
 }
