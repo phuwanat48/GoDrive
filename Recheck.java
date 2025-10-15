@@ -1,10 +1,14 @@
-// FileName: Recheck.java (Modified to open Payment window)
+// FileName: Recheck.java (Modified to open Payment and Reserve windows)
 
 import CarCard.Vehicle;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent; // << NEW
+import javax.swing.*; // << NEW
+
+// import org.w3c.dom.events.MouseEvent; // REMOVED: Replaced with java.awt.event.MouseEvent
 
 public class Recheck {
     
@@ -21,9 +25,13 @@ public class Recheck {
         JLabel l2 = new JLabel("Home");
         l2.setFont(new Font("Arial", Font.BOLD, 18));
         l2.setBounds(50, 65, 120, 20);
-        JLabel l3 = new JLabel("Rent");
-        l3.setFont(new Font("Arial", Font.BOLD, 18));
-        l3.setBounds(50, 105, 120, 20);
+        l2.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                f.dispose();
+                new Date();
+            }
+        });
 
         // --- พื้นหลังหลักสีขาว ---
         JPanel p1 = new JPanel();
@@ -89,7 +97,7 @@ public class Recheck {
         b1.setBounds(320, 570, 400, 35);
         b1.setBackground(new Color(215, 18, 18));
         
-        // << CHANGED: เพิ่ม ActionListener ให้ปุ่ม
+        // Action Listener สำหรับปุ่ม Make payment
         b1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -98,15 +106,28 @@ public class Recheck {
             }
         });
         
-        // ---- ส่วนท้าย ----
+        // ---- ส่วนท้าย (ปุ่ม Back) ----
         JPanel back = new JPanel();
         back.setBounds(35, 580, 60, 60);
         back.setBackground(new Color(235, 243, 250));
-        ImageIcon backIcon2 = new ImageIcon(getClass().getResource("/images/back.png"));
+        // ตรวจสอบให้แน่ใจว่า path /images/back.png ถูกต้องและไฟล์มีอยู่จริง
+        ImageIcon backIcon2 = new ImageIcon(getClass().getResource("/images/back.png")); 
         Image scaledback = backIcon2.getImage().getScaledInstance(35, 35, Image.SCALE_SMOOTH);
         ImageIcon backicon = new ImageIcon(scaledback);
         JLabel backLabel = new JLabel(backicon);
         back.add(backLabel);
+        
+        // << CHANGED: เพิ่ม MouseListener ให้กับ JPanel 'back' เพื่อให้กดได้
+        back.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // สมมติว่ามีคลาสชื่อ Reserve อยู่
+                new Reserve(vehicle, bookingInfo); // เปิดหน้า Reserve
+                f.dispose(); // ปิดหน้า Recheck ปัจจุบัน
+            }
+            // เพิ่ม mousePressed, mouseReleased, mouseEntered, mouseExited เพื่อให้มีพฤติกรรมคล้ายปุ่มได้
+        });
+        
         
         JLabel email = new JLabel("godriveofficial@gmail.com");
         email.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -115,8 +136,7 @@ public class Recheck {
         // --- เพิ่มทุกอย่างลงใน Frame ---
         cp.add(l1);
         cp.add(l2);
-        cp.add(l3);
-        cp.add(email);   
+        cp.add(email); 
         cp.add(back);
         
         cp.add(mainTitle);

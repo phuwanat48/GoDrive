@@ -70,8 +70,8 @@ public class Date {
         l1.setFont(new Font("Arial", Font.BOLD, 29));
         JLabel l2 = new JLabel("Home");
         l2.setFont(new Font("Arial", Font.BOLD, 18));
-        JLabel l3 = new JLabel("Rent");
-        l3.setFont(new Font("Arial", Font.BOLD, 18));
+        
+        
         Admin_login = new JButton("Admin Login");
 
         Admin_login.setForeground(Color.WHITE);
@@ -124,8 +124,8 @@ public class Date {
         menu.add(l1);
         menu.add(Box.createRigidArea(new Dimension(0, 40)));
         menu.add(l2);
-        menu.add(Box.createRigidArea(new Dimension(0, 15)));
-        menu.add(l3);
+        
+        
         menu.add(Box.createRigidArea(new Dimension(0, 450))); // ลดระยะห่างหน่อย
         menu.add(Admin_login); // << เพิ่มปุ่มเข้ามาตรงนี้
 
@@ -221,6 +221,7 @@ public class Date {
         f.setSize(900, 700);
         f.setLocationRelativeTo(null);
         f.setVisible(true);
+        f.setResizable(false);
 
         addPlaceholderBehavior(hour, "Hours");
         addPlaceholderBehavior(minute, "Minute");

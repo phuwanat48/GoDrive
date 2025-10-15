@@ -1,5 +1,7 @@
 import CarCard.Vehicle;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -46,16 +48,21 @@ public class Payment {
         
         JLabel home = new JLabel("Home");
         home.setFont(new Font("Arial", Font.BOLD, 18));
-
-        JLabel rent = new JLabel("Rent");
-        rent.setFont(new Font("Arial", Font.BOLD, 18));
+        home.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                f.dispose();
+                new Date();
+            }
+        });
+        
         
         menu.add(name);
         menu.add(Box.createRigidArea(new Dimension(0, 40)));
         menu.add(home);
         menu.add(Box.createRigidArea(new Dimension(0, 15)));
-        menu.add(rent);
-        menu.add(Box.createVerticalGlue());
+        menu.add(Box.createRigidArea(new Dimension(0, 450)));
+        
         
         ImageIcon originalArrowIcon = new ImageIcon(getClass().getResource("/images/back.png"));
         Image resizedArrowImage = originalArrowIcon.getImage().getScaledInstance(35, 35, Image.SCALE_SMOOTH);
@@ -69,6 +76,8 @@ public class Payment {
         refreshButton.addActionListener(e -> {
             System.out.println("Refresh click!");
             JOptionPane.showMessageDialog(f, "Are you sure you want to go back? ");
+            f.dispose();
+            new Recheck(vehicle, bookingInfo); // กลับไปหน้า Recheck
         });
         menu.add(refreshButton);
 
@@ -257,7 +266,7 @@ public class Payment {
             
             System.out.println("Slip saved to: " + destinationPath.toString());
             
-            new waitPayment(vehicle, bookingInfo); 
+            new crPayment(vehicle, bookingInfo);
             f.dispose();
 
         } catch (IOException ex) {

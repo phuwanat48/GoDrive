@@ -1,4 +1,5 @@
 import CarCard.Vehicle;
+import CarCard.VehicleManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedWriter;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
 
 public class Reserve {
 
@@ -32,9 +34,14 @@ public class Reserve {
         JLabel l2 = new JLabel("Home");
         l2.setFont(new Font("Arial", Font.BOLD, 18));
         l2.setBounds(50, 65, 120, 20);
-        JLabel l3 = new JLabel("Rent");
-        l3.setFont(new Font("Arial", Font.BOLD, 18));
-        l3.setBounds(50, 105, 120, 20);
+        l2.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                f.dispose();
+                new Date();
+            }
+        });
+        
         JPanel p1 = new JPanel();
         p1.setBounds(200, 0, 600, 50);
         p1.setSize(1500, 700);
@@ -91,7 +98,7 @@ public class Reserve {
         month.setBounds(300, 530, 50, 25);
         year = new JComboBox<>();
         year.addItem("YYYY");
-        for (int i = 2568; i <= 2575; i++) year.addItem(String.valueOf(i));
+        for (int i = 2569; i <= 2575; i++) year.addItem(String.valueOf(i));
         year.setBounds(350, 530, 60, 25);
         car = new JComboBox<>();
         car.addItem("CAR TYPE");
@@ -218,6 +225,18 @@ public class Reserve {
         ImageIcon backicon = new ImageIcon(scaledback);
         JLabel backLabel = new JLabel(backicon);
         back.add(backLabel);
+        // << เพิ่ม ActionListener ให้ปุ่ม Back
+        back.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                f.dispose(); // ปิดหน้าปัจจุบัน (Reserve)
+                VehicleManager vehicleManager = new VehicleManager(); // สร้าง VehicleManager ใหม่
+                // เปิดหน้า CarCardIn ใหม่ โดยใช้ manager และ bookingInfo เดิม
+                new CarCardIn(vehicleManager, bookingInfo); 
+            }
+        });
+       
+            
         
         JLabel email = new JLabel("godriveofficial@gmail.com");
         email.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -229,7 +248,7 @@ public class Reserve {
         cp.add(summaryPanel);
         cp.add(l1);
         cp.add(l2);
-        cp.add(l3);
+        
         cp.add(p1);
 
         f.setSize(900, 700);
@@ -260,11 +279,62 @@ public class Reserve {
     }
 
     private void saveBookingAndProceed() {
-        if (tf1.getText().isEmpty() || tf2.getText().isEmpty() || tf3.getText().isEmpty() || tf5.getText().isEmpty() || tf6.getText().isEmpty() ||
-            tf1.getText().equals("Enter your firstname") || tf2.getText().equals("Enter your lastname")) {
+        String firstName = tf1.getText();
+        String lastName = tf2.getText();
+        String licenseNumber = tf3.getText();
+        String email = tf5.getText();
+        String phone = tf6.getText();
+
+        // Check for required fields and placeholders
+        if (firstName.isEmpty() || lastName.isEmpty() || licenseNumber.isEmpty() || email.isEmpty() || phone.isEmpty() ||
+            firstName.equals("Enter your firstname") || lastName.equals("Enter your lastname") ||
+            licenseNumber.equals("Enter your driver's license number") || email.equals("Enter your email") ||
+            phone.equals("Enter your phone number")) {
             JOptionPane.showMessageDialog(f, "Please fill in all required fields.", "Incomplete Information", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        // 1. First Name Validation (English letters only, no spaces, no numbers)
+        if (!firstName.matches("^[a-zA-Z]+$")) {
+            JOptionPane.showMessageDialog(f, "First name must contain English letters only, no spaces, and no numbers.", "Invalid First Name", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 2. Last Name Validation (English letters only, no spaces, no numbers)
+        if (!lastName.matches("^[a-zA-Z]+$")) {
+            JOptionPane.showMessageDialog(f, "Last name must contain English letters only, no spaces, and no numbers.", "Invalid Last Name", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // 3. Email Validation (Basic Gmail format check)
+        // This regex checks for the basic structure: localpart@domain.tld, specifically for gmail.com
+        // A full validation is complex, but this covers the basic requirement.
+        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
+            JOptionPane.showMessageDialog(f, "Please enter a valid email address.", "Invalid Email", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // 4. Phone Number Validation (10 digits, no repeating all 10 digits)
+        if (phone.length() != 10 || !phone.matches("\\d{10}")) {
+             // The KeyListener already restricts this, but a final check is safer.
+             JOptionPane.showMessageDialog(f, "Phone number must be exactly 10 digits.", "Invalid Phone Number", JOptionPane.WARNING_MESSAGE);
+             return;
+        }
+        
+        // Check for 10 repeating digits (e.g., 9999999999)
+        char firstDigit = phone.charAt(0);
+        boolean allSame = true;
+        for (int i = 1; i < phone.length(); i++) {
+            if (phone.charAt(i) != firstDigit) {
+                allSame = false;
+                break;
+            }
+        }
+        if (allSame) {
+            JOptionPane.showMessageDialog(f, "Phone number cannot consist of 10 identical digits (e.g., 9999999999).", "Invalid Phone Number", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
 
         String fileName = "File/personal.csv";
         DateTimeFormatter dataFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -274,11 +344,8 @@ public class Reserve {
         String vehicleBrand = selectedVehicle.getBrand();
         String vehicleModel = selectedVehicle.getModel();
         String vehiclePrice = selectedVehicle.getPrice();
-        String firstName = tf1.getText();
-        String lastName = tf2.getText();
-        String licenseNumber = tf3.getText();
-        String email = tf5.getText();
-        String phone = tf6.getText();
+        double totalprice = bookingInfo.calculateTotalPrice(selectedVehicle);
+        String status = "Pending";
         
         boolean isSaveSuccessful = false;
 
@@ -293,14 +360,14 @@ public class Reserve {
             
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
                 if (!fileExists) {
-                    writer.write("FirstName,LastName,LicenseNumber,Email,Phone,VehicleBrand,VehicleModel,Price,PickupDateTime,ReturnDateTime");
+                    writer.write("Status,FirstName,LastName,LicenseNumber,Email,Phone,VehicleBrand,VehicleModel,Price,TotalPrice,PickupDateTime,ReturnDateTime");
                     writer.newLine();
                 }
 
                 String line = String.join(",", 
-                    "\"" + firstName + "\"", "\"" + lastName + "\"", "\"" + licenseNumber + "\"", 
+                    "\"" + status + "\"", "\"" + firstName + "\"", "\"" + lastName + "\"", "\"" + licenseNumber + "\"", 
                     "\"" + email + "\"", "\"" + phone + "\"", "\"" + vehicleBrand + "\"",
-                    "\"" + vehicleModel + "\"", "\"" + vehiclePrice + "\"", "\"" + pickupDateTime + "\"",
+                    "\"" + vehicleModel + "\"", "\"" + vehiclePrice + "\"", "\"" + totalprice +"\"", "\"" + pickupDateTime + "\"",
                     "\"" + returnDateTime + "\""
                 );
                 

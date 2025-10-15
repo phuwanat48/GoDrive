@@ -154,7 +154,10 @@ public class Addnewcar extends JFrame {
     private void createListeners() {
         // ---- Listener สำหรับปุ่ม Next Page ----
         nextPageButton.addActionListener(e -> {
-          JOptionPane.showMessageDialog(this, "Next to back");
+          
+          this.dispose();
+          new UserHistory();
+          
         });
 
         // ---- Listener เดิม ----

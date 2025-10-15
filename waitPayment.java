@@ -70,11 +70,12 @@ public class waitPayment {
         CrPanel.setBounds(40, 80, 300, 360);
         CrPanel.setBackground(new Color(245, 245, 245));
         
-        // --- ข้อความ Please wait... ---
-        JLabel wait = new JLabel("Please wait...");
-        wait.setBounds(65, 160, 200, 40); 
-        wait.setFont(new Font("Arial", Font.BOLD, 30));
-        CrPanel.add(wait);
+     // --- รูปภาพ Correct ---
+        ImageIcon originalIcon = new ImageIcon(getClass().getResource("/images/correct.png"));
+        Image scaledImage1 = originalIcon.getImage().getScaledInstance(180, 180, Image.SCALE_SMOOTH); 
+        ImageIcon Correct = new ImageIcon(scaledImage1);
+        JLabel CorrectLabel = new JLabel(Correct);
+        CrPanel.add(CorrectLabel, BorderLayout.CENTER);
         
         mainPanel.add(CrPanel);
 

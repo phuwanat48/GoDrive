@@ -2,6 +2,8 @@
 
 import CarCard.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -9,6 +11,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
 
 public class CarCardIn extends JFrame {
 
@@ -52,13 +55,37 @@ public class CarCardIn extends JFrame {
         namebrand.setFont(new Font("Arial", Font.BOLD, 29));
         JLabel home = new JLabel("Home");
         home.setFont(new Font("Arial", Font.BOLD, 18));
-        JLabel rent = new JLabel("Rent");
-        rent.setFont(new Font("Arial", Font.BOLD, 18));
+        home.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                CarCardIn.this.dispose();
+                new Date();
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+            
+        });
+        
         menu.add(namebrand);
         menu.add(Box.createRigidArea(new Dimension(0, 40)));
         menu.add(home);
         menu.add(Box.createRigidArea(new Dimension(0, 15)));
-        menu.add(rent);
+      
         menu.add(Box.createVerticalGlue());
         try {
             String arrowIconPath = "images/back.png";
@@ -72,6 +99,10 @@ public class CarCardIn extends JFrame {
             backButton.setOpaque(false);
             backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             menu.add(backButton);
+            backButton.addActionListener(e -> {
+                this.dispose();
+                new Date();
+            });
         } catch (Exception e) { System.err.println("Could not load back.png icon."); }
         JPanel bannerPanel = new JPanel(new BorderLayout());
         bannerPanel.setBackground(Color.WHITE);
