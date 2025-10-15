@@ -1,13 +1,9 @@
+
 package CarCard;
-import GoDrive.CarCard;
-import GoDrive.*;
-
-
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.function.Consumer;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
@@ -15,38 +11,38 @@ public class CarCardPN extends JPanel {
 
     private final JPanel cardListPanel;
     private final List<Vehicle> vehicleList;
+    private final Consumer<Vehicle> onCarSelectAction;
 
-    public CarCardPN(List<Vehicle> vehicleList) {
+    public CarCardPN(List<Vehicle> vehicleList, Consumer<Vehicle> onCarSelectAction) {
         this.vehicleList = vehicleList;
+        this.onCarSelectAction = onCarSelectAction;
         
+        // <<-- กลับมาใช้ GridLayout(0, 3, ...)
         cardListPanel = new JPanel(new GridLayout(0, 3, 25, 20));
         cardListPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
         cardListPanel.setBackground(Color.WHITE);
 
         setLayout(new BorderLayout());
         JScrollPane scrollPane = new JScrollPane(cardListPanel);
+        // ป้องกันแถบเลื่อนแนวนอน และให้แถบเลื่อนแนวตั้งแสดงเมื่อจำเป็น
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBorder(null);
         add(scrollPane, BorderLayout.CENTER);
         
         refreshPanel();
     }
-
+    
+    // ทำให้การเพิ่ม/ลบ เรียก refreshPanel เพื่อความถูกต้อง
     public void addVehicle(Vehicle vehicle) {
-        JButton card = createCardFromData(vehicle);
-        vehicle.setCardComponent(card);
         this.vehicleList.add(vehicle);
-        cardListPanel.add(card);
-        revalidateAndRepaint();
+        refreshPanel();
     }
-    
     public void removeVehicle(Vehicle vehicle) {
-        if (vehicle.getCardComponent() != null) {
-            this.vehicleList.remove(vehicle);
-            cardListPanel.remove(vehicle.getCardComponent());
-            revalidateAndRepaint();
-        }
+        this.vehicleList.remove(vehicle);
+        refreshPanel();
     }
-    
+
     private void refreshPanel() {
         cardListPanel.removeAll();
         for (Vehicle v : this.vehicleList) {
@@ -55,6 +51,19 @@ public class CarCardPN extends JPanel {
             }
             cardListPanel.add(v.getCardComponent());
         }
+        
+        // <<-- เพิ่มโค้ดสำหรับเติม Panel ที่มองไม่เห็นเข้าไปในแถวสุดท้าย
+        int vehicleCount = this.vehicleList.size();
+        if (vehicleCount > 0) {
+            // คำนวณหาจำนวน panel ที่ต้องเติมเพื่อให้ครบ 3
+            int placeholders = (3 - (vehicleCount % 3)) % 3;
+            for (int i = 0; i < placeholders; i++) {
+                JPanel placeholder = new JPanel();
+                placeholder.setOpaque(false); // ทำให้โปร่งใส
+                cardListPanel.add(placeholder);
+            }
+        }
+        
         revalidateAndRepaint();
     }
 
@@ -63,6 +72,7 @@ public class CarCardPN extends JPanel {
         cardListPanel.repaint();
     }
 
+    // เมธอด createCardFromData ไม่ต้องแก้ไข ใช้ของเดิมได้เลย
     private JButton createCardFromData(Vehicle vehicle) {
         JButton card = new JButton();
         card.setLayout(new BorderLayout());
@@ -72,7 +82,10 @@ public class CarCardPN extends JPanel {
         
         if (vehicle.getIcon() != null) {
             Image image = vehicle.getIcon().getImage().getScaledInstance(180, 130, Image.SCALE_SMOOTH);
-            card.add(new JLabel(new ImageIcon(image)), BorderLayout.CENTER);
+            // ใช้ JLabel เพื่อให้รูปอยู่ตรงกลาง ไม่ขยายตามขนาดปุ่ม
+            JLabel imageLabel = new JLabel(new ImageIcon(image));
+            imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            card.add(imageLabel, BorderLayout.CENTER);
         }
         
         JPanel details = new JPanel();
@@ -80,52 +93,32 @@ public class CarCardPN extends JPanel {
         details.setBorder(new EmptyBorder(10, 10, 10, 10));
         details.setBackground(new Color(245, 245, 245));
 
-        
-        // 1. สร้าง Font และ สี ที่ต้องการ
         Font brandFont = new Font("Arial", Font.BOLD, 16);
         Font modelFont = new Font("Arial", Font.PLAIN, 14); 
         Font priceFont = new Font("Arial", Font.BOLD, 14);
         Color priceColor = new Color(0, 51, 102); 
 
-        // 2. สร้าง JLabel และกำหนดค่า
         JLabel brandLabel = new JLabel(vehicle.getBrand());
         brandLabel.setFont(brandFont);
-
         JLabel modelLabel = new JLabel(vehicle.getModel());
         modelLabel.setFont(modelFont);
-
         JLabel priceLabel = new JLabel(vehicle.getPrice());
         priceLabel.setFont(priceFont);
         priceLabel.setForeground(priceColor); 
 
-        // 3. เพิ่ม JLabel ลงใน Panel
         details.add(brandLabel);
         details.add(Box.createRigidArea(new Dimension(0, 2)));
         details.add(modelLabel);
         details.add(Box.createRigidArea(new Dimension(0, 5)));
         details.add(priceLabel);
         
-
         card.add(details, BorderLayout.SOUTH);
-
-        card.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "You Choose : " + vehicle);
-
-                // ส่ง "card" ซึ่งเป็น component ที่ถูกกดเข้าไปในเมธอด
-                newpage(card);
+        
+        card.addActionListener(e -> {
+            if (onCarSelectAction != null) {
+                onCarSelectAction.accept(vehicle);
             }
         });
         return card;
-    }
-
-    private void newpage(Component component) {
-        // ค้นหา Window (ซึ่งอาจเป็น JFrame หรือ JDialog) ที่ component นี้อยู่
-        Window window = SwingUtilities.getWindowAncestor(component);
-        if (window != null) {
-            window.dispose(); // สั่งปิด Window ที่เจอ
-        }
-        new Reserve();
     }
 }

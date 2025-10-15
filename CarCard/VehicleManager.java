@@ -6,7 +6,7 @@ import java.util.List;
 public class VehicleManager {
     private final List<Vehicle> carList = new ArrayList<>();
     private final List<Vehicle> motorcycleList = new ArrayList<>();
-    private final String fileName = "Lib/data/vehicles.csv";
+    private final String fileName = "File/vehicles.csv";
 
     public VehicleManager() {
         loadDataFromFile();
