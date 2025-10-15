@@ -5,12 +5,14 @@ import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import javax.swing.*;
 import javax.swing.RowSorter.SortKey;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.*; // เพิ่ม Import สำหรับ PatternSyntaxException
+import javax.swing.table.*; // เพิ่ม Import สำหรับ Pattern
+
 
 public class UserHistory extends JFrame {
     private JTable table;
@@ -23,6 +25,8 @@ public class UserHistory extends JFrame {
 
     // ชื่อไฟล์ CSV
     private static final String CSV_FILE_NAME = "./File/personal.csv"; 
+    // Directory สำหรับเก็บสลิป
+    private static final String SLIPS_DIR = "./slips";
 
     public UserHistory() {
         this.parentFrame = this; // กำหนดค่า parentFrame เป็น JFrame ตัวนี้
@@ -68,7 +72,7 @@ public class UserHistory extends JFrame {
         add(topPanel, BorderLayout.NORTH);
 
         // ตาราง
-        String[] columnNames = {"status", "Brand", "Order Date", "Buyer", "Price(Baht)", "Payment", "Details", "Delete"};
+        String[] columnNames = {"Status", "Brand", "Order Date", "Buyer", "Price(Baht)", "Payment", "Details", "Delete"};
         
         model = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -103,7 +107,8 @@ public class UserHistory extends JFrame {
         add(backBtn, BorderLayout.SOUTH);
         backBtn.addActionListener(e -> {
             this.dispose();
-            new Addnewcar(null, null, null); // กลับไปหน้า Addnewcar (ต้องเปลี่ยนตามโครงสร้างจริงของคุณ)
+            // ต้องเปลี่ยนตามโครงสร้างจริงของคุณ
+             new Addnewcar(null, null, null); 
         });
 
         setVisible(true);
@@ -278,6 +283,41 @@ public class UserHistory extends JFrame {
         }
         return null; // ไม่พบรายการ
     }
+    
+    // ******************************************************
+    // ** เมธอดใหม่: สำหรับค้นหา path ของไฟล์สลิป **
+    // ******************************************************
+    /**
+     * ค้นหา Path เต็มของไฟล์สลิปจาก directory 'slips'
+     * ไฟล์สลิปจะมีรูปแบบ: FirstName_LastName_slip_YYYYMMDD_HHmmss.ext
+     * @param firstName ชื่อ
+     * @param lastName นามสกุล
+     * @return Path เต็มของไฟล์สลิป หรือ null หากไม่พบ
+     */
+    private String findSlipPath(String firstName, String lastName) {
+        File slipsDir = new File(SLIPS_DIR);
+        if (!slipsDir.exists() || !slipsDir.isDirectory()) {
+            System.out.println("Slip directory not found: " + SLIPS_DIR);
+            return null;
+        }
+
+        // ชื่อที่ใช้ในการค้นหา (Sanitized: ชื่อ_นามสกุล)
+        String searchPrefix = (firstName + "_" + lastName).replaceAll("[^a-zA-Z0-9_]", "");
+        
+        // รูปแบบ RegEx สำหรับค้นหาไฟล์: [searchPrefix]_slip_YYYYMMDD_HHmmss.ext
+        // (?i) ทำให้ไม่สนใจตัวพิมพ์เล็ก/ใหญ่
+        // Pattern.quote() เพื่อป้องกันอักขระพิเศษในชื่อ
+        Pattern pattern = Pattern.compile("(?i)^" + Pattern.quote(searchPrefix) + "_slip_\\d{8}_\\d{6}\\.(jpg|jpeg|png)$");
+
+        for (File file : slipsDir.listFiles()) {
+            if (file.isFile()) {
+                if (pattern.matcher(file.getName()).matches()) {
+                    return file.getAbsolutePath();
+                }
+            }
+        }
+        return null; 
+    }
     // ******************************************************
     
 
@@ -318,7 +358,7 @@ public class UserHistory extends JFrame {
                     String brand = data[6] + " " + data[7]; 
                     String price = data[9] + " Baht";
                     String orderDate = data[10];
-                   
+                    
                     
                     model.addRow(new Object[]{
                         status,
@@ -350,8 +390,8 @@ public class UserHistory extends JFrame {
         public ButtonRenderer() { setOpaque(true); }
 
         public Component getTableCellRendererComponent(JTable table, Object value,
-                                                       boolean isSelected, boolean hasFocus,
-                                                       int row, int column) {
+                                                      boolean isSelected, boolean hasFocus,
+                                                      int row, int column) {
             setText((value == null) ? "" : value.toString());
             // เพิ่มสีปุ่ม
             switch (value.toString()) {
@@ -393,6 +433,7 @@ public class UserHistory extends JFrame {
                 Object price = model.getValueAt(modelRow, 4); 
                 
                 
+                
                 // Logic ตามปุ่มที่กด
                 switch (label) {
                     case "Payment":
@@ -411,26 +452,55 @@ public class UserHistory extends JFrame {
                         break;
                     case "Details":
                         // ******************************************************
-                        // ** แก้ไขส่วนนี้เพื่อดึง Pickup Date และ Return Date **
+                        // ** แก้ไขส่วนนี้เพื่อดึงรายละเอียดและแสดงสลิป **
                         // ******************************************************
                         String[] allDetails = getDetailsFromCSV(orderDate.toString());
                         String pickupDate = orderDate.toString(); // OrderDate คือ Pickup Date
                         String returnDate = "N/A";
+                        String firstName = "N/A";
+                        String lastName = "N/A";
                         
                         if (allDetails != null && allDetails.length >= 12) {
                             // ReturnDateTime คือ index 11
                             returnDate = allDetails[11];
+                            // FirstName คือ index 1, LastName คือ index 2
+                            firstName = allDetails[1];
+                            lastName = allDetails[2];
                         }
                         
-                        JOptionPane.showMessageDialog(parentFrame, 
+                        String slipPath = findSlipPath(firstName, lastName);
+                        Icon slipIcon = null;
+                        if (slipPath != null) {
+                            ImageIcon originalIcon = new ImageIcon(slipPath);
+                            // ปรับขนาดรูปให้เหมาะสมกับการแสดงใน JOptionPane (เช่น 400x500)
+                            Image scaledImage = originalIcon.getImage().getScaledInstance(400, 500, Image.SCALE_SMOOTH);
+                            slipIcon = new ImageIcon(scaledImage);
+                        }
+                        
+                        JPanel detailPanel = new JPanel(new BorderLayout(10, 10));
+                        JTextArea detailArea = new JTextArea(
                             "Veiw Details:\n" + 
-                            "  Buyer: " + buyer + "\n" +
-                            "  Brand: " + brand + "\n" +
-                            "  Status: " + status + "\n" +
-                            "  Total Price: " + price + "\n" +
-                            "  Pickup Date: " + pickupDate + "\n" + // เพิ่ม Pickup Date
-                            "  Return Date: " + returnDate, // เพิ่ม Return Date
-                            "Order Details", JOptionPane.INFORMATION_MESSAGE);
+                            "  Buyer: " + buyer + "\n" +
+                            "  Brand: " + brand + "\n" +
+                            "  Status: " + status + "\n" +
+                            "  Total Price: " + price + "\n" +
+                            "  Pickup Date: " + pickupDate + "\n" +
+                            "  Return Date: " + returnDate
+                        );
+                        detailArea.setEditable(false);
+                        detailArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+                        detailPanel.add(detailArea, BorderLayout.NORTH);
+                        
+                        if (slipIcon != null) {
+                            detailPanel.add(new JLabel("Payment Slip:"), BorderLayout.CENTER);
+                            detailPanel.add(new JLabel(slipIcon), BorderLayout.SOUTH);
+                        } else {
+                            detailPanel.add(new JLabel("Payment Slip: NOT FOUND (Searching for: " + firstName + "_" + lastName + "_slip_...)", SwingConstants.CENTER), BorderLayout.CENTER);
+                        }
+
+                        // ใช้ JOptionPane.showMessageDialog โดยส่ง detailPanel เข้าไป
+                        JOptionPane.showMessageDialog(parentFrame, detailPanel, "Order Details", JOptionPane.PLAIN_MESSAGE);
+                        
                         break;
                         // ******************************************************
                     case "Delete":

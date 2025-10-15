@@ -163,13 +163,13 @@ public class Payment {
 
         // --- ส่วน QR Code ---
         JPanel Qr = new JPanel();
-        Qr.setLayout(new BorderLayout());  
-        Qr.setBounds(25, 20, 250, 300);  
+        Qr.setLayout(new BorderLayout()); 
+        Qr.setBounds(25, 20, 250, 300); 
         Qr.setBackground(Color.white);
         QrPanel.add(Qr);
 
         ImageIcon originalIcon = new ImageIcon(getClass().getResource("/images/Qr.jpg"));
-        Image scaledQrImage = originalIcon.getImage().getScaledInstance(250, 300, Image.SCALE_SMOOTH);  
+        Image scaledQrImage = originalIcon.getImage().getScaledInstance(250, 300, Image.SCALE_SMOOTH); 
         ImageIcon userIcon = new ImageIcon(scaledQrImage);
         JLabel imageLabelQr = new JLabel(userIcon);
         Qr.add(imageLabelQr, BorderLayout.CENTER);
@@ -249,6 +249,16 @@ public class Payment {
             if (!slipsDir.exists()) {
                 slipsDir.mkdir();
             }
+            
+            // ******************************************************************
+            // *** NEW: ดึงชื่อและนามสกุลจาก bookingInfo และใช้ในการสร้างชื่อไฟล์ ***
+            String firstName = bookingInfo.getFirstName(); 
+            String lastName = bookingInfo.getLastName();
+            
+            // สร้างชื่อไฟล์: FirstName_LastName_slip_YYYYMMDD_HHmmss.ext
+            // .replaceAll("[^a-zA-Z0-9_]", "") เพื่อป้องกันอักขระพิเศษในชื่อ
+            String sanitizedName = (firstName + "_" + lastName).replaceAll("[^a-zA-Z0-9_]", "");
+            // ******************************************************************
 
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
             String originalFileName = selectedFile.getName();
@@ -257,7 +267,10 @@ public class Payment {
             if (i > 0) {
                 fileExtension = originalFileName.substring(i);
             }
-            String newFileName = "slip_" + timeStamp + fileExtension;
+            
+            // ใช้ชื่อที่ประกอบด้วยชื่อลูกค้า
+            String newFileName = sanitizedName + "_slip_" + timeStamp + fileExtension;
+            
 
             Path sourcePath = selectedFile.toPath();
             Path destinationPath = Paths.get(slipsDir.getAbsolutePath(), newFileName);

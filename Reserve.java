@@ -66,7 +66,7 @@ public class Reserve {
         tf2.setForeground(Color.GRAY);
         addPlaceholderListener(tf2, placeholder2);
         cp.add(tf2);
-        JLabel driver = new JLabel("Driver's license  number");
+        JLabel driver = new JLabel("Driver's license  number");
         driver.setBounds(250, 430, 200, 20);
         cp.add(driver);
         String placeholder3 = "Enter your driver's license number";
@@ -86,30 +86,44 @@ public class Reserve {
             }
         });
         cp.add(tf3);
+        
+        // --- ส่วนเลือกวันหมดอายุ (Expiration Date) ---
         JLabel PD = new JLabel("Expiration date");
         PD.setBounds(250, 500, 100, 30);
+        
         day = new JComboBox<>();
         day.addItem("DD");
         for (int i = 1; i <= 31; i++) day.addItem(String.valueOf(i));
         day.setBounds(250, 530, 50, 25);
+        
         month = new JComboBox<>();
         month.addItem("MM");
         for (int i = 1; i <= 12; i++) month.addItem(String.valueOf(i));
         month.setBounds(300, 530, 50, 25);
+        
         year = new JComboBox<>();
         year.addItem("YYYY");
         for (int i = 2569; i <= 2575; i++) year.addItem(String.valueOf(i));
         year.setBounds(350, 530, 60, 25);
+        
         car = new JComboBox<>();
         car.addItem("CAR TYPE");
         car.addItem("car");
         car.addItem("motorcycle");
         car.setBounds(410, 530, 90, 25);
+        
         cp.add(PD);
         cp.add(day);
         cp.add(month);
         cp.add(year);
         cp.add(car);
+
+        // *** NEW: เพิ่ม Listener ให้ Month และ Year เพื่ออัพเดท Day ***
+        ActionListener dateListener = e -> updateDays();
+        month.addActionListener(dateListener);
+        year.addActionListener(dateListener);
+        // *******************************************************
+        
         JLabel adress = new JLabel("Email");
         adress.setBounds(550, 350, 100, 20);
         cp.add(adress);
@@ -235,7 +249,7 @@ public class Reserve {
                 new CarCardIn(vehicleManager, bookingInfo); 
             }
         });
-       
+        
             
         
         JLabel email = new JLabel("godriveofficial@gmail.com");
@@ -257,6 +271,66 @@ public class Reserve {
         f.setVisible(true);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
+    
+    // ******************************************************
+    // *** NEW: เมธอดสำหรับอัพเดทจำนวนวันตามเดือนและปี ***
+    // ******************************************************
+    private void updateDays() {
+        String selectedMonthStr = (String) month.getSelectedItem();
+        String selectedYearStr = (String) year.getSelectedItem();
+
+        if (selectedMonthStr.equals("MM") || selectedYearStr.equals("YYYY")) {
+            // ไม่ต้องทำอะไรหากยังไม่ได้เลือกเดือนหรือปี
+            return; 
+        }
+
+        try {
+            int selectedMonth = Integer.parseInt(selectedMonthStr);
+            int selectedYear = Integer.parseInt(selectedYearStr) - 543; // แปลง พ.ศ. เป็น ค.ศ. (เช่น 2569 -> 2026)
+            int daysInMonth;
+
+            // ตรวจสอบเดือนที่มี 30 วัน
+            if (selectedMonth == 4 || selectedMonth == 6 || selectedMonth == 9 || selectedMonth == 11) {
+                daysInMonth = 30;
+            } 
+            // ตรวจสอบเดือนกุมภาพันธ์
+            else if (selectedMonth == 2) {
+                // ตรวจสอบปีอธิกสุรทิน (Leap Year)
+                boolean isLeap = (selectedYear % 4 == 0 && selectedYear % 100 != 0) || (selectedYear % 400 == 0);
+                daysInMonth = isLeap ? 29 : 28;
+            } 
+            // เดือนที่เหลือมี 31 วัน
+            else {
+                daysInMonth = 31;
+            }
+            
+            // เก็บวันที่ถูกเลือกไว้ก่อน
+            String currentDay = (String) day.getSelectedItem();
+            int currentDayInt = (currentDay.equals("DD") || currentDay == null) ? 1 : Integer.parseInt(currentDay);
+            
+            // ล้าง ComboBox ของวัน
+            day.removeAllItems();
+            day.addItem("DD");
+
+            // เพิ่มจำนวนวันใหม่
+            for (int i = 1; i <= daysInMonth; i++) {
+                day.addItem(String.valueOf(i));
+            }
+            
+            // คืนค่าวันที่ถูกเลือกกลับไป หากวันที่นั้นยังอยู่ในช่วงที่ถูกต้อง
+            if (currentDayInt <= daysInMonth) {
+                day.setSelectedItem(String.valueOf(currentDayInt));
+            } else {
+                day.setSelectedItem("DD"); // ตั้งค่าเป็น DD หากวันที่เดิมเกินขีดจำกัด
+            }
+
+
+        } catch (NumberFormatException ex) {
+            // ควรจะไม่เกิดเพราะเรากรองค่า MM/YYYY ไปแล้ว
+            ex.printStackTrace();
+        }
+    }
+    // ******************************************************
 
     private void addPlaceholderListener(JTextField textField, String placeholder) {
         textField.addFocusListener(new FocusListener() {
@@ -284,6 +358,12 @@ public class Reserve {
         String licenseNumber = tf3.getText();
         String email = tf5.getText();
         String phone = tf6.getText();
+        
+        String expDay = (String) day.getSelectedItem();
+        String expMonth = (String) month.getSelectedItem();
+        String expYear = (String) year.getSelectedItem();
+        String carType = (String) car.getSelectedItem();
+
 
         // Check for required fields and placeholders
         if (firstName.isEmpty() || lastName.isEmpty() || licenseNumber.isEmpty() || email.isEmpty() || phone.isEmpty() ||
@@ -293,6 +373,15 @@ public class Reserve {
             JOptionPane.showMessageDialog(f, "Please fill in all required fields.", "Incomplete Information", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
+        // ******************************************************
+        // *** NEW: ตรวจสอบความถูกต้องของ Expiration Date (ต้องไม่เป็น DD, MM, YYYY) ***
+        if (expDay.equals("DD") || expMonth.equals("MM") || expYear.equals("YYYY") || carType.equals("CAR TYPE")) {
+             JOptionPane.showMessageDialog(f, "Please select a valid Expiration Date and Car Type.", "Incomplete Information", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        // ******************************************************
+
 
         // 1. First Name Validation (English letters only, no spaces, no numbers)
         if (!firstName.matches("^[a-zA-Z]+$")) {
@@ -307,8 +396,7 @@ public class Reserve {
         }
         
         // 3. Email Validation (Basic Gmail format check)
-        // This regex checks for the basic structure: localpart@domain.tld, specifically for gmail.com
-        // A full validation is complex, but this covers the basic requirement.
+        // This regex checks for the basic structure: localpart@domain.tld
         if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")) {
             JOptionPane.showMessageDialog(f, "Please enter a valid email address.", "Invalid Email", JOptionPane.WARNING_MESSAGE);
             return;
@@ -316,9 +404,8 @@ public class Reserve {
         
         // 4. Phone Number Validation (10 digits, no repeating all 10 digits)
         if (phone.length() != 10 || !phone.matches("\\d{10}")) {
-             // The KeyListener already restricts this, but a final check is safer.
-             JOptionPane.showMessageDialog(f, "Phone number must be exactly 10 digits.", "Invalid Phone Number", JOptionPane.WARNING_MESSAGE);
-             return;
+              JOptionPane.showMessageDialog(f, "Phone number must be exactly 10 digits.", "Invalid Phone Number", JOptionPane.WARNING_MESSAGE);
+              return;
         }
         
         // Check for 10 repeating digits (e.g., 9999999999)
@@ -334,6 +421,12 @@ public class Reserve {
             JOptionPane.showMessageDialog(f, "Phone number cannot consist of 10 identical digits (e.g., 9999999999).", "Invalid Phone Number", JOptionPane.WARNING_MESSAGE);
             return;
         }
+        
+        // ******************************************************************
+        // *** NEW: บันทึกชื่อและนามสกุลลงใน BookingInfo เพื่อส่งต่อไปหน้า Payment ***
+        bookingInfo.setFirstName(firstName);
+        bookingInfo.setLastName(lastName);
+        // ******************************************************************
 
 
         String fileName = "File/personal.csv";
@@ -382,8 +475,12 @@ public class Reserve {
         }
         
         if (isSaveSuccessful) {
-            new Recheck(selectedVehicle, bookingInfo);
+            
+            new Recheck(selectedVehicle, bookingInfo); 
             f.dispose();
+            
+            // เพื่อให้โค้ดรันได้โดยไม่ติด Error ถ้าไม่มี Recheck class:
+            JOptionPane.showMessageDialog(f, "Booking saved successfully! Proceeding to the next step.", "Success", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 }

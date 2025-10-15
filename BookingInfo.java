@@ -10,6 +10,9 @@ public class BookingInfo {
     private String returnDateTimeString;
     private LocalDateTime pickupDateTime;
     private LocalDateTime returnDateTime;
+     // NEW FIELDS
+    private String firstName;
+    private String lastName;
 
     public BookingInfo(String pickupLocation, String pickupDateTimeString, String returnDateTimeString, LocalDateTime pickupDateTime, LocalDateTime returnDateTime) {
         this.pickupLocation = pickupLocation;
@@ -17,6 +20,8 @@ public class BookingInfo {
         this.returnDateTimeString = returnDateTimeString;
         this.pickupDateTime = pickupDateTime;
         this.returnDateTime = returnDateTime;
+
+        
     }
 
     // --- Getters (เหมือนเดิม) ---
@@ -38,6 +43,22 @@ public class BookingInfo {
 
     public LocalDateTime getReturnDateTime() {
         return returnDateTime;
+    }
+    // NEW GETTERS AND SETTERS
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     // << NEW METHOD: Added for calculating the total rental price >>
